@@ -28,7 +28,7 @@ class VBoxApplet extends PanelMenu.Button
         this._tmpItem = new PopupMenu.PopupMenuItem( '...' );
         this.menu.addMenuItem( this._tmpItem );
 
-        Mainloop.timeout_add_seconds( 5, this.populateMenu.bind(this) );
+        Mainloop.timeout_add_seconds( 10, this.populateMenu.bind(this) );
     }
 
     startVbox() {
