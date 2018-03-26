@@ -1,0 +1,4 @@
+*.zip
+po/*.mo
+*~
+nbproject/

@@ -1,0 +1,8 @@
+{
+    "name": "VirtualBox applet",
+    "version": "0.1",
+    "description": "Provide menu to run VirtualBox machines",
+    "url": "https://github.com/eugene-rom/vbox-applet",
+    "uuid": "vbox-applet@gs.eros2.info",
+    "shell-version": ["3.26.0", "3.28.0"]
+}
