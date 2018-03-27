@@ -146,7 +146,7 @@ class VBoxApplet extends PanelMenu.Button
 
     _onVisibilityChanged() {
         if ( this.menu.actor.visible && this._populated ) {
-            Mainloop.timeout_add( 100, this._markRunning.bind(this) );
+            Mainloop.timeout_add( 200, this._markRunning.bind(this) );
         }
     }
 
