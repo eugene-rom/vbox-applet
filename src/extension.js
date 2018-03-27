@@ -33,7 +33,7 @@ class VBoxApplet extends PanelMenu.Button
         this._tmpItem = new PopupMenu.PopupMenuItem( '...' );
         this.menu.addMenuItem( this._tmpItem );
 
-        Mainloop.timeout_add_seconds( 7, this.populateMenu.bind(this) );
+        Mainloop.timeout_add_seconds( 5, this.populateMenu.bind(this) );
     }
 
     startVbox() {
@@ -146,7 +146,7 @@ class VBoxApplet extends PanelMenu.Button
 
     _onVisibilityChanged() {
         if ( this.menu.actor.visible && this._populated ) {
-            Mainloop.timeout_add( 300, this._markRunning.bind(this) );
+            Mainloop.timeout_add( 100, this._markRunning.bind(this) );
         }
     }
 
