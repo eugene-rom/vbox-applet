@@ -2,3 +2,4 @@
 po/*.mo
 *~
 nbproject/
+build/
