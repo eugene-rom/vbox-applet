@@ -46,7 +46,7 @@ class VBoxApplet extends PanelMenu.Button
             this._activateWindow( name );
         }
         else {
-            GLib.spawn_command_line_async( 'virtualbox --startvm ' + id );
+            GLib.spawn_command_line_async( 'vboxmanage startvm ' + id );
         }
     }
 
