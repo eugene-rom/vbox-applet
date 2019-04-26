@@ -1,12 +1,10 @@
-/* global imports */
+/* global imports, global */
 
-const St = imports.gi.St;
-const Gio = imports.gi.Gio;
+const { GLib, Gio, St, Shell } = imports.gi;
+
+const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-const GLib = imports.gi.GLib;
-const Main = imports.ui.main;
-const Mainloop = imports.mainloop;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 
 const TEXT_VBOXAPP = 'VirtualBox applet';
@@ -24,23 +22,22 @@ class VBoxApplet extends PanelMenu.Button
 
         this._populated = false;
         this._menuitems = [];
-        let hbox = new St.BoxLayout( { style_class: 'panel-status-menu-box' } );
         let gicon = Gio.icon_new_for_string( Me.path + '/icons/vbox.svg' );
-        hbox.add_child( new St.Icon( { gicon: gicon, icon_size: ICON_SIZE } ) );
-        this.actor.add_child(hbox);
-        this.menu.actor.connect('notify::visible', this._onVisibilityChanged.bind(this));
+        let icon = new St.Icon( { gicon: gicon, icon_size: ICON_SIZE } );
+        this.actor.add_child( icon );
+        this.menu.actor.connect( 'notify::visible', this._onVisibilityChanged.bind(this) );
 
         this._tmpItem = new PopupMenu.PopupMenuItem( '...' );
         this.menu.addMenuItem( this._tmpItem );
 
-        Mainloop.timeout_add_seconds( 5, this.populateMenu.bind(this) );
+        GLib.timeout_add_seconds( GLib.PRIORITY_DEFAULT, 5, this._populateMenu.bind(this) );
     }
 
-    startVbox() {
+    _startVbox() {
         GLib.spawn_command_line_async( 'virtualbox' );
     }
 
-    startVM( name, id )
+    _startVM( name, id )
     {
         if ( this._isVMRunning( id ) ) {
             this._activateWindow( name );
@@ -50,7 +47,7 @@ class VBoxApplet extends PanelMenu.Button
         }
     }
 
-    parseVMList( vms )
+    _parseVMList( vms )
     {
         let res = [];
         if ( vms.length !== 0 )
@@ -75,7 +72,7 @@ class VBoxApplet extends PanelMenu.Button
         return res;
     }
 
-    populateMenu()
+    _populateMenu()
     {
         let vms;
         try {
@@ -88,7 +85,7 @@ class VBoxApplet extends PanelMenu.Button
             return;
         }
 
-        let machines = this.parseVMList( vms );
+        let machines = this._parseVMList( vms );
 
         if ( machines.length !== 0 )
         {
@@ -101,7 +98,7 @@ class VBoxApplet extends PanelMenu.Button
 
                 let menuitem = new PopupMenu.PopupMenuItem( name );
                 menuitem._vmid = id;
-                menuitem.connect( 'activate', this.startVM.bind(this, name, id) );
+                menuitem.connect( 'activate', this._startVM.bind(this, name, id) );
                 this.menu.addMenuItem(menuitem);
                 this._menuitems.push(menuitem);
             }
@@ -110,7 +107,7 @@ class VBoxApplet extends PanelMenu.Button
         this.menu.addMenuItem( new PopupMenu.PopupSeparatorMenuItem() );
 
         let menuitem = new PopupMenu.PopupMenuItem( 'VirtualBox...' );
-    	menuitem.connect( 'activate', this.startVbox.bind(this) );
+    	menuitem.connect( 'activate', this._startVbox.bind(this) );
         this.menu.addMenuItem( menuitem );
 
         this._populated = true;
@@ -126,7 +123,7 @@ class VBoxApplet extends PanelMenu.Button
 
     _isVMRunning( id ) {
         let machines = this._getRunningVMs();
-        return this.searchInVMs( machines, id );
+        return this._searchInVMs( machines, id );
     }
 
     _getRunningVMs()
@@ -141,12 +138,12 @@ class VBoxApplet extends PanelMenu.Button
             return;
         }
 
-        return this.parseVMList( vms );
+        return this._parseVMList( vms );
     }
 
     _onVisibilityChanged() {
         if ( this.menu.actor.visible && this._populated ) {
-            Mainloop.timeout_add( 200, this._markRunning.bind(this) );
+            GLib.timeout_add( GLib.PRIORITY_DEFAULT, 200, this._markRunning.bind(this) );
         }
     }
 
@@ -155,12 +152,12 @@ class VBoxApplet extends PanelMenu.Button
         let machines = this._getRunningVMs();
 
         for (var i = 0; i < this._menuitems.length; i++) {
-            let running = this.searchInVMs( machines, this._menuitems[i]._vmid );
+            let running = this._searchInVMs( machines, this._menuitems[i]._vmid );
             this._menuitems[i].setOrnament( running ? PopupMenu.Ornament.DOT : PopupMenu.Ornament.NONE );
         }
     }
 
-    searchInVMs( machines, id )
+    _searchInVMs( machines, id )
     {
         for ( var i = 0; i < machines.length; i++ ) {
             if ( machines[i].id === id ) {
