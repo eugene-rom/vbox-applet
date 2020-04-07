@@ -1,11 +1,12 @@
 /* global imports, global */
 
-const { GLib, Gio, St, Shell } = imports.gi;
+const { GLib, Gio, GObject, St, Shell } = imports.gi;
 
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
+const ByteArray = imports.byteArray;
 
 const TEXT_VBOXAPP = 'VirtualBox applet';
 const TEXT_LOGID   = 'vbox-applet';
@@ -15,17 +16,18 @@ const DEBUG        = false;
 let vboxapplet;
 let enabled = false;
 
+let VBoxApplet = GObject.registerClass(
 class VBoxApplet extends PanelMenu.Button
 {
-    constructor()
+    _init()
     {
-        super( 0.0, TEXT_VBOXAPP );
+        super._init( 0.0, TEXT_VBOXAPP );
 
         this._populated = false;
         this._menuitems = [];
         let gicon = Gio.icon_new_for_string( Me.path + '/icons/vbox.svg' );
         let icon = new St.Icon( { gicon: gicon, icon_size: ICON_SIZE } );
-        this.actor.add_child( icon );
+        this.add_child( icon );
 
         this._tmpItem = new PopupMenu.PopupMenuItem( '...' );
         this.menu.addMenuItem( this._tmpItem );
@@ -71,7 +73,7 @@ class VBoxApplet extends PanelMenu.Button
             let vms;
             try {
                 this._log( 'Run \'vboxmanage list vms\'' );
-                vms = String( GLib.spawn_command_line_sync( 'vboxmanage list vms' )[1] );
+                vms = ByteArray.toString( GLib.spawn_command_line_sync( 'vboxmanage list vms' )[1] );
             }
             catch (err) {
                 this._log( err );
@@ -124,7 +126,7 @@ class VBoxApplet extends PanelMenu.Button
             let vms;
             try {
                 this._log( 'Run \'vboxmanage list runningvms\'' );
-                vms = String( GLib.spawn_command_line_sync( 'vboxmanage list runningvms' )[1] );
+                vms = ByteArray.toString( GLib.spawn_command_line_sync( 'vboxmanage list runningvms' )[1] );
             }
             catch (err) {
                 this._log( err );
@@ -136,7 +138,7 @@ class VBoxApplet extends PanelMenu.Button
 
         this._onVisibilityChanged = () => {
             if ( this.menu.actor.visible && this._populated ) {
-                GLib.timeout_add( GLib.PRIORITY_DEFAULT, 200, this._markRunning.bind(this) );
+                GLib.timeout_add( GLib.PRIORITY_DEFAULT, 10, this._markRunning.bind(this) );
             }
         };
 
@@ -173,9 +175,9 @@ class VBoxApplet extends PanelMenu.Button
         };
 
         this.menu.actor.connect( 'notify::visible', this._onVisibilityChanged.bind(this) );
-        GLib.timeout_add_seconds( GLib.PRIORITY_DEFAULT, 5, this._populateMenu.bind(this) );
+        GLib.timeout_add_seconds( GLib.PRIORITY_DEFAULT, 3, this._populateMenu.bind(this) );
     }
-};
+} );
 
 
 function enable() {

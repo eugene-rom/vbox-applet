@@ -1,8 +1,8 @@
 {
     "name": "VirtualBox applet",
-    "version": "0.2",
+    "version": 5,
     "description": "Provide menu to run VirtualBox machines and switch between running VMs",
     "url": "https://github.com/eugene-rom/vbox-applet",
     "uuid": "vbox-applet@gs.eros2.info",
-    "shell-version": ["3.26.0", "3.28.0", "3.32.0"]
+    "shell-version": ["3.36"]
 }
