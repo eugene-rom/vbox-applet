@@ -36,13 +36,12 @@ class VBoxApplet extends PanelMenu.Button
             GLib.spawn_command_line_async( 'virtualbox' );
         };
 
-        this._startVM = ( name, id ) => {
-            if ( this._isVMRunning( id ) ) {
+        this._startVM = ( name, id, type ) => {
+            if ( type != 'headless' && this._isVMRunning( id ) ) {
                 this._activateWindow( name );
+                return;
             }
-            else {
-                GLib.spawn_command_line_async( 'vboxmanage startvm ' + id );
-            }
+            GLib.spawn_command_line_async( 'vboxmanage startvm ' + id + ' --type ' + type );
         };
 
         this._parseVMList = ( vms ) => {
@@ -92,17 +91,26 @@ class VBoxApplet extends PanelMenu.Button
                     let name = machines[i].name;
                     let id = machines[i].id;
 
-                    let menuitem = new PopupMenu.PopupMenuItem( name );
+                    let subitem = new PopupMenu.PopupSubMenuMenuItem( name );
+
+                    let menuitem = new PopupMenu.PopupMenuItem( 'Normal' );
                     menuitem._vmid = id;
-                    menuitem.connect( 'activate', this._startVM.bind(this, name, id) );
-                    this.menu.addMenuItem(menuitem);
-                    this._menuitems.push(menuitem);
+                    menuitem.connect( 'activate', this._startVM.bind(this, name, id, 'gui') );
+                    subitem.menu.addMenuItem(menuitem);
+
+                    menuitem = new PopupMenu.PopupMenuItem( 'Headless' );
+                    menuitem._vmid = id;
+                    menuitem.connect( 'activate', this._startVM.bind(this, name, id, 'headless') );
+                    subitem.menu.addMenuItem(menuitem);
+
+                    this.menu.addMenuItem(subitem);
+                    this._menuitems.push(subitem);
                 }
             }
 
             this.menu.addMenuItem( new PopupMenu.PopupSeparatorMenuItem() );
 
-            let menuitem = new PopupMenu.PopupMenuItem( 'VirtualBox...' );
+            let menuitem = new PopupMenu.PopupMenuItem( 'VBox Manager' );
             menuitem.connect( 'activate', this._startVbox.bind(this) );
             this.menu.addMenuItem( menuitem );
 
