@@ -92,14 +92,13 @@ class VBoxApplet extends PanelMenu.Button
                     let id = machines[i].id;
 
                     let subitem = new PopupMenu.PopupSubMenuMenuItem( name );
+                    subitem._vmid = id;
 
                     let menuitem = new PopupMenu.PopupMenuItem( 'Normal' );
-                    menuitem._vmid = id;
                     menuitem.connect( 'activate', this._startVM.bind(this, name, id, 'gui') );
                     subitem.menu.addMenuItem(menuitem);
 
                     menuitem = new PopupMenu.PopupMenuItem( 'Headless' );
-                    menuitem._vmid = id;
                     menuitem.connect( 'activate', this._startVM.bind(this, name, id, 'headless') );
                     subitem.menu.addMenuItem(menuitem);
 
