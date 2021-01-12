@@ -72,8 +72,8 @@ class VBoxApplet extends PanelMenu.Button
         this._populateMenu = () => {
             let vms;
             try {
-                this._log( 'Run \'vboxmanage list vms\'' );
-                vms = ByteArray.toString( GLib.spawn_command_line_sync( 'vboxmanage list vms' )[1] );
+                this._log( 'Run \'vboxmanage list -s vms\'' );
+                vms = ByteArray.toString( GLib.spawn_command_line_sync( 'vboxmanage list -s vms' )[1] );
             }
             catch (err) {
                 this._log( err );
