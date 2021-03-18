@@ -5,7 +5,8 @@ const { GLib, Gio, GObject, St, Shell } = imports.gi;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-const Me = imports.misc.extensionUtils.getCurrentExtension();
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
 const ByteArray = imports.byteArray;
 
 const TEXT_VBOXAPP = 'VirtualBox applet';
@@ -13,6 +14,9 @@ const TEXT_LOGID   = 'vbox-applet';
 const ICON_SIZE    = 22;
 const DEBUG        = false;
 
+const SETTING_SORT = 'sort';
+
+let settings;
 let vboxapplet;
 let enabled = false;
 
@@ -45,6 +49,13 @@ class VBoxApplet extends PanelMenu.Button
             }
         };
 
+        this._toggleSort = ( menuitemSort ) => {
+            let sort = settings.get_boolean( SETTING_SORT );
+            menuitemSort.setToggleState( !sort );
+            settings.set_boolean( SETTING_SORT, !sort );
+            GLib.timeout_add( GLib.PRIORITY_DEFAULT, 10, this._populateMenu.bind(this) );
+        };
+
         this._parseVMList = ( vms ) => {
             let res = [];
             if ( vms.length !== 0 )
@@ -70,10 +81,16 @@ class VBoxApplet extends PanelMenu.Button
         };
 
         this._populateMenu = () => {
+            this._menuitems = [];
+            this.menu.removeAll();
+
             let vms;
-            try {
-                this._log( 'Run \'vboxmanage list vms\'' );
-                vms = ByteArray.toString( GLib.spawn_command_line_sync( 'vboxmanage list vms' )[1] );
+            let sort = settings.get_boolean( SETTING_SORT );
+            try
+            {
+                let cmd = 'vboxmanage list ' + ( sort ? '-s' : '' ) + ' vms';
+                this._log( 'Run \'' + cmd + '\'' );
+                vms = ByteArray.toString( GLib.spawn_command_line_sync( cmd )[1] );
             }
             catch (err) {
                 this._log( err );
@@ -85,8 +102,6 @@ class VBoxApplet extends PanelMenu.Button
 
             if ( machines.length !== 0 )
             {
-                this._tmpItem.destroy();
-
                 for ( let i = 0; i < machines.length; i++ )
                 {
                     let name = machines[i].name;
@@ -102,11 +117,21 @@ class VBoxApplet extends PanelMenu.Button
 
             this.menu.addMenuItem( new PopupMenu.PopupSeparatorMenuItem() );
 
-            let menuitem = new PopupMenu.PopupMenuItem( 'VirtualBox...' );
-            menuitem.connect( 'activate', this._startVbox.bind(this) );
-            this.menu.addMenuItem( menuitem );
+            let menuitemRefresh = new PopupMenu.PopupMenuItem( 'Refresh' );
+            menuitemRefresh.connect( 'activate', this._populateMenu.bind(this) );
+            this.menu.addMenuItem( menuitemRefresh );
+
+            let menuitemSort = new PopupMenu.PopupSwitchMenuItem( 'Sort', sort );
+            menuitemSort.connect( 'toggled', this._toggleSort.bind(this, menuitemSort) );
+            this.menu.addMenuItem( menuitemSort );
+
+            let menuitemStartVBox = new PopupMenu.PopupMenuItem( 'VirtualBox...' );
+            menuitemStartVBox.connect( 'activate', this._startVbox.bind(this) );
+            this.menu.addMenuItem( menuitemStartVBox );
 
             this._populated = true;
+
+            this._onVisibilityChanged();
 
             return false;
         };
@@ -149,6 +174,7 @@ class VBoxApplet extends PanelMenu.Button
                 let running = this._searchInVMs( machines, this._menuitems[i]._vmid );
                 this._menuitems[i].setOrnament( running ? PopupMenu.Ornament.DOT : PopupMenu.Ornament.NONE );
             }
+            return false;
         };
 
         this._searchInVMs = ( machines, id ) => {
@@ -179,6 +205,9 @@ class VBoxApplet extends PanelMenu.Button
     }
 } );
 
+function init() {
+    settings = ExtensionUtils.getSettings();
+}
 
 function enable() {
     enabled = true;
