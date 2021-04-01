@@ -29,7 +29,7 @@ class VBoxApplet extends PanelMenu.Button
 
         this._populated = false;
         this._menuitems = [];
-        let gicon = Gio.icon_new_for_string( Me.path + '/icons/vbox.svg' );
+        let gicon = Gio.icon_new_for_string( Me.path + '/icons/vbox-symbolic.svg' );
         let icon = new St.Icon( { gicon: gicon, icon_size: ICON_SIZE } );
         this.add_child( icon );
 
