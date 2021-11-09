@@ -205,12 +205,9 @@ class VBoxApplet extends PanelMenu.Button
     }
 } );
 
-function init() {
-    settings = ExtensionUtils.getSettings();
-}
-
 function enable() {
     enabled = true;
+    settings = ExtensionUtils.getSettings();
     vboxapplet = new VBoxApplet;
     Main.panel.addToStatusArea( TEXT_VBOXAPP, vboxapplet );
 }
@@ -218,4 +215,5 @@ function enable() {
 function disable() {
     enabled = false;
     vboxapplet.destroy();
+    settings = null;
 }
