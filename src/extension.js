@@ -19,6 +19,9 @@ const SETTING_SORT = 'sort';
 let settings;
 let vboxapplet;
 let enabled = false;
+let sourceId1 = null;
+let sourceId2 = null;
+let sourceId3 = null;
 
 let VBoxApplet = GObject.registerClass(
 class VBoxApplet extends PanelMenu.Button
@@ -53,7 +56,7 @@ class VBoxApplet extends PanelMenu.Button
             let sort = settings.get_boolean( SETTING_SORT );
             menuitemSort.setToggleState( !sort );
             settings.set_boolean( SETTING_SORT, !sort );
-            GLib.timeout_add( GLib.PRIORITY_DEFAULT, 10, this._populateMenu.bind(this) );
+            sourceId1 = GLib.timeout_add( GLib.PRIORITY_DEFAULT, 10, this._populateMenu.bind(this) );
         };
 
         this._parseVMList = ( vms ) => {
@@ -163,7 +166,7 @@ class VBoxApplet extends PanelMenu.Button
 
         this._onVisibilityChanged = () => {
             if ( this.menu.actor.visible && this._populated ) {
-                GLib.timeout_add( GLib.PRIORITY_DEFAULT, 10, this._markRunning.bind(this) );
+                sourceId2 = GLib.timeout_add( GLib.PRIORITY_DEFAULT, 10, this._markRunning.bind(this) );
             }
         };
 
@@ -201,7 +204,7 @@ class VBoxApplet extends PanelMenu.Button
         };
 
         this.menu.actor.connect( 'notify::visible', this._onVisibilityChanged.bind(this) );
-        GLib.timeout_add_seconds( GLib.PRIORITY_DEFAULT, 3, this._populateMenu.bind(this) );
+        sourceId3 = GLib.timeout_add_seconds( GLib.PRIORITY_DEFAULT, 3, this._populateMenu.bind(this) );
     }
 } );
 
@@ -212,8 +215,25 @@ function enable() {
     Main.panel.addToStatusArea( TEXT_VBOXAPP, vboxapplet );
 }
 
-function disable() {
+function disable() 
+{
     enabled = false;
+ 
+    // GS guidelines requirements
+    if ( sourceId1 ) {
+        GLib.Source.remove( sourceId1 );
+        sourceId1 = null;
+    }
+    if ( sourceId2 ) {
+        GLib.Source.remove( sourceId2 );
+        sourceId2 = null;
+    }
+    if ( sourceId3 ) {
+        GLib.Source.remove( sourceId3 );
+        sourceId3 = null;
+    }
+    
     vboxapplet.destroy();
     settings = null;
+    vboxapplet = null;
 }
