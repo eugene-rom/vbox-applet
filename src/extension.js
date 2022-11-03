@@ -15,6 +15,7 @@ const ICON_SIZE    = 22;
 const DEBUG        = false;
 
 const SETTING_SORT = 'sort';
+const SETTING_HEADLESS = 'headless';
 
 let settings;
 let vboxapplet;
@@ -48,7 +49,9 @@ class VBoxApplet extends PanelMenu.Button
                 this._activateWindow( name );
             }
             else {
-                GLib.spawn_command_line_async( 'vboxmanage startvm ' + id );
+                let headless = settings.get_boolean( SETTING_HEADLESS );
+
+                GLib.spawn_command_line_async( 'vboxmanage startvm ' + id + ( headless ? ' --type headless' : '' ));
             }
         };
 
@@ -59,7 +62,13 @@ class VBoxApplet extends PanelMenu.Button
             sourceId1 = GLib.timeout_add( GLib.PRIORITY_DEFAULT, 10, this._populateMenu.bind(this) );
         };
 
-        this._parseVMList = ( vms ) => {
+        this._toggleHeadless = (menuitemHeadless) => {
+            let headless = settings.get_boolean( SETTING_HEADLESS );
+            menuitemHeadless.setToggleState( !headless );
+            settings.set_boolean( SETTING_HEADLESS, !headless );
+        };
+
+        this._parseVMList = (vms) => {
             let res = [];
             if ( vms.length !== 0 )
             {
@@ -89,6 +98,7 @@ class VBoxApplet extends PanelMenu.Button
 
             let vms;
             let sort = settings.get_boolean( SETTING_SORT );
+            let headless = settings.get_boolean( SETTING_HEADLESS );
             try
             {
                 let cmd = 'vboxmanage list ' + ( sort ? '-s' : '' ) + ' vms';
@@ -127,6 +137,10 @@ class VBoxApplet extends PanelMenu.Button
             let menuitemSort = new PopupMenu.PopupSwitchMenuItem( 'Sort', sort );
             menuitemSort.connect( 'toggled', this._toggleSort.bind(this, menuitemSort) );
             this.menu.addMenuItem( menuitemSort );
+
+            let menuitemHeadless = new PopupMenu.PopupSwitchMenuItem( 'Headless', headless );
+            menuitemHeadless.connect( 'toggled', this._toggleHeadless.bind(this, menuitemHeadless) );
+            this.menu.addMenuItem( menuitemHeadless );
 
             let menuitemStartVBox = new PopupMenu.PopupMenuItem( 'VirtualBox...' );
             menuitemStartVBox.connect( 'activate', this._startVbox.bind(this) );
