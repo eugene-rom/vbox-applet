@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="gnome-shell-vbox-applet">
-  <schema path="/org/gnome/shell/extensions/vbox-applet/" id="org.gnome.shell.extensions.vbox-applet">
+  <schema path="/org/gnome/shell/extensions/vbox-applet/"
+    id="org.gnome.shell.extensions.vbox-applet">
     <key name="sort" type="b">
       <default>false</default>
       <summary>Sort VMs list by name</summary>
       <description>Sort VMs list by name</description>
     </key>
     <key name="headless" type="b">
+      <default>false</default>
+      <summary>Start an headless vm</summary>
+      <description>Start an headless vm</description>
+    </key>
+    <key name="detachable" type="b">
       <default>false</default>
       <summary>Start an headless vm</summary>
       <description>Start an headless vm</description>
