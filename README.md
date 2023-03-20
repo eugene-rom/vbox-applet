@@ -6,7 +6,7 @@
 </a>
 
 
-This applet is a fork from https://github.com/eugene-rom/vbox-applet repository. I just added the headless start option.
+This applet is a fork from https://github.com/eugene-rom/vbox-applet repository. 
 
 Gnome Shell VirtualBox applet provide menu to run VirtualBox machines and switch between running VMs.
 
@@ -15,6 +15,7 @@ VM list populated after few seconds after extension is activated, to not slow do
 
 Applet checks if machines is running and mark items with dot shortly after popup becomes visible.
 Applet is able to run a VM in headless mode by toggling the headless option.
+Applet is able to run a VM in detachable mode by toggling the detachable option.
 
 ![screenshot](screenshot.png?raw=true)
 

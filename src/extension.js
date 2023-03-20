@@ -62,16 +62,24 @@ let VBoxApplet = GObject.registerClass(
                 sourceId1 = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 10, this._populateMenu.bind(this));
             };
 
-            this._toggleHeadless = (menuitemHeadless) => {
+            this._toggleHeadless = (menuitemHeadless, menuitemDetachable) => {
                 let headless = settings.get_boolean(SETTING_HEADLESS);
                 menuitemHeadless.setToggleState(!headless);
                 settings.set_boolean(SETTING_HEADLESS, !headless);
+                if(!headless){
+                    menuitemDetachable.setToggleState(true);
+                    settings.set_boolean(SETTING_DETACHABLE, true);
+                }
             };
 
-            this._toggleDetachable = (menuitemDetachable) => {
-                let headless = settings.get_boolean(SETTING_DETACHABLE);
+            this._toggleDetachable = (menuitemDetachable, menuitemHeadless) => {
+                let detachable = settings.get_boolean(SETTING_DETACHABLE);
                 menuitemDetachable.setToggleState(!detachable);
-                settings.set_boolean(SETTING_HEADLESS, !detachable);
+                settings.set_boolean(SETTING_DETACHABLE, !detachable);
+                if(detachable){
+                    menuitemHeadless.setToggleState(false);
+                    settings.set_boolean(SETTING_HEADLESS, false);
+                }
             };
 
             this._parseVMList = (vms) => {
@@ -104,6 +112,10 @@ let VBoxApplet = GObject.registerClass(
                 let sort = settings.get_boolean(SETTING_SORT);
                 let headless = settings.get_boolean(SETTING_HEADLESS);
                 let detachable = settings.get_boolean(SETTING_DETACHABLE);
+
+                if(headless != detachable){
+                    settings.set_boolean(SETTING_DETACHABLE, headless);
+                }
 
                 try {
                     let cmd = 'vboxmanage list ' + (sort ? '-s' : '') + ' vms';
@@ -141,13 +153,13 @@ let VBoxApplet = GObject.registerClass(
                 menuitemSort.connect('toggled', this._toggleSort.bind(this, menuitemSort));
                 this.menu.addMenuItem(menuitemSort);
 
-                let menuitemHeadless = new PopupMenu.PopupSwitchMenuItem('Headless', headless);
-                menuitemHeadless.connect('toggled', this._toggleHeadless.bind(this, menuitemHeadless));
-                this.menu.addMenuItem(menuitemHeadless);
-
                 let menuitemDetachable = new PopupMenu.PopupSwitchMenuItem('Detachable', detachable);
-                menuitemHeadless.connect('toggled', this._toggleDetachable.bind(this, menuitemDetachable));
+                let menuitemHeadless = new PopupMenu.PopupSwitchMenuItem('Headless', headless);
+                menuitemDetachable.connect('toggled', this._toggleDetachable.bind(this, menuitemDetachable, menuitemHeadless));
                 this.menu.addMenuItem(menuitemDetachable);
+
+                menuitemHeadless.connect('toggled', this._toggleHeadless.bind(this, menuitemHeadless, menuitemDetachable));
+                this.menu.addMenuItem(menuitemHeadless);
 
                 let menuitemStartVBox = new PopupMenu.PopupMenuItem('VirtualBox...');
                 menuitemStartVBox.connect('activate', this._startVbox.bind(this));

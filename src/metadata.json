@@ -1,7 +1,7 @@
 {
     "name": "VirtualBox applet",
     "version": 13,
-    "description": "Provide menu to run VirtualBox machines and switch between running VMs",
+    "description": "Provide menu to run VirtualBox machines and switch between running VMs.\nIt provides options for detachable head and headless mode.\nThis is a fork of https://extensions.gnome.org/extension/1415/virtualbox-applet/ extension.",
     "settings-schema": "org.gnome.shell.extensions.vbox-applet",
     "url": "https://github.com/Buba98/vbox-applet",
     "uuid": "vbox-applet@buba98",
