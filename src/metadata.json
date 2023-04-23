@@ -5,5 +5,5 @@
     "settings-schema": "org.gnome.shell.extensions.vbox-applet",
     "url": "https://github.com/Buba98/vbox-applet",
     "uuid": "vbox-applet@buba98",
-    "shell-version": ["3.36","3.38","40","41","42","43"]
+    "shell-version": ["3.36","3.38","40","41","42","43", "44"]
 }
