@@ -9,8 +9,6 @@ import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
-const ByteArray = imports.byteArray;
-
 const TEXT_VBOXAPP = 'VirtualBox applet';
 const TEXT_LOGID   = 'vbox-applet';
 const ICON_SIZE    = 22;
@@ -33,6 +31,7 @@ class VBoxAppletBtn extends PanelMenu.Button
     {
         super( 0.0, TEXT_VBOXAPP );
 
+        this._textdecoder = new TextDecoder();
         this._populated = false;
         this._menuitems = [];
         let gicon = Gio.icon_new_for_string( path + '/icons/vbox-symbolic.svg' );
@@ -102,7 +101,7 @@ class VBoxAppletBtn extends PanelMenu.Button
         {
             let cmd = 'vboxmanage list ' + ( sort ? '-s' : '' ) + ' vms';
             this._log( 'Run \'' + cmd + '\'' );
-            vms = ByteArray.toString( GLib.spawn_command_line_sync( cmd )[1] );
+            vms = this._textdecoder.decode( GLib.spawn_command_line_sync( cmd )[1] );
         }
         catch (err) {
             this._log( err );
@@ -164,7 +163,7 @@ class VBoxAppletBtn extends PanelMenu.Button
         let vms;
         try {
             this._log( 'Run \'vboxmanage list runningvms\'' );
-            vms = ByteArray.toString( GLib.spawn_command_line_sync( 'vboxmanage list runningvms' )[1] );
+            vms = this._textdecoder.decode( GLib.spawn_command_line_sync( 'vboxmanage list runningvms' )[1] );
         }
         catch (err) {
             this._log( err );
