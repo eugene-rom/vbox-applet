@@ -5,5 +5,5 @@
     "settings-schema": "org.gnome.shell.extensions.vbox-applet",
     "url": "https://github.com/eugene-rom/vbox-applet",
     "uuid": "vbox-applet@gs.eros2.info",
-    "shell-version": ["45","46"]
+    "shell-version": ["45","46","47"]
 }
